@@ -1,32 +1,31 @@
 import React, { useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
-import { useLazyQuery } from '@apollo/client';
-import { QUERY_CHECKOUT } from '../../utils/queries';
+import { useSelector, useDispatch } from 'react-redux'; // replace with useSelector, useDispatch
+import { toggleCart, addMultipleToCart, checkout } from '../../store/eStoreSlice'; // replace with toggleCart, addMultipleToCart, checkout 
 import { idbPromise } from '../../utils/helpers';
 import CartItem from '../CartItem';
 import Auth from '../../utils/auth';
-import { useStoreContext } from '../../utils/GlobalState';
-import { TOGGLE_CART, ADD_MULTIPLE_TO_CART } from '../../utils/actions';
 import './style.css';
 
 const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
 
 const Cart = () => {
-  const [state, dispatch] = useStoreContext();
-  const [getCheckout, { data }] = useLazyQuery(QUERY_CHECKOUT);
+  const state = useSelector((state) => state.eStore); // replace with useSelector
+  const dispatch = useDispatch(); // replace with useDispatch
 
-  useEffect(() => {
-    if (data) {
-      stripePromise.then((res) => {
-        res.redirectToCheckout({ sessionId: data.checkout.session });
-      });
-    }
-  }, [data]);
+  // no longer needed with redux
+  // useEffect(() => {
+  //   if (data) {
+  //     stripePromise.then((res) => {
+  //       res.redirectToCheckout({ sessionId: data.checkout.session });
+  //     });
+  //   }
+  // }, [data]);
 
   useEffect(() => {
     async function getCart() {
       const cart = await idbPromise('cart', 'get');
-      dispatch({ type: ADD_MULTIPLE_TO_CART, products: [...cart] });
+      dispatch( addMultipleToCart ([...cart] )); // addMultipleToCart from eStoreSlice
     }
 
     if (!state.cart.length) {
@@ -34,8 +33,9 @@ const Cart = () => {
     }
   }, [state.cart.length, dispatch]);
 
-  function toggleCart() {
-    dispatch({ type: TOGGLE_CART });
+  //add handleToggleCart function
+  function handleToggleCart() {
+    dispatch(toggleCart());
   }
 
   function calculateTotal() {
@@ -55,14 +55,12 @@ const Cart = () => {
       }
     });
 
-    getCheckout({
-      variables: { products: productIds },
-    });
+    dispatch(checkout(productIds)); //dispatch handles the checkout with redux and redirects to stripe
   }
 
   if (!state.cartOpen) {
     return (
-      <div className="cart-closed" onClick={toggleCart}>
+      <div className="cart-closed" onClick={handleToggleCart}>
         <span role="img" aria-label="trash">
           🛒
         </span>
@@ -72,7 +70,7 @@ const Cart = () => {
 
   return (
     <div className="cart">
-      <div className="close" onClick={toggleCart}>
+      <div className="close" onClick={handleToggleCart}>
         [close]
       </div>
       <h2>Shopping Cart</h2>
@@ -97,9 +95,9 @@ const Cart = () => {
           <span role="img" aria-label="shocked">
             😱
           </span>
-          You haven't added anything to your cart yet!
+          Nothing added to cart yet!
         </h3>
-      )}
+        )};
     </div>
   );
 };
