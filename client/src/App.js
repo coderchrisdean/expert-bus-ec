@@ -17,6 +17,7 @@ import Nav from './components/Nav';
 import { Provider } from './utils/GlobalState'; //replace StoreProvider with Provider
 import Success from './pages/Success';
 import OrderHistory from './pages/OrderHistory';
+import StoreProvider from './utils/GlobalState';
 
 const httpLink = createHttpLink({
   uri: '/graphql',
