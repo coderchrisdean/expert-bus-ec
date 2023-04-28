@@ -1,31 +1,33 @@
-import React, { useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { useSelector, useDispatch } from 'react-redux'; // replace with useSelector, useDispatch
-import { toggleCart, addMultipleToCart, checkout } from '../../store/eStoreSlice'; // replace with toggleCart, addMultipleToCart, checkout 
-import { idbPromise } from '../../utils/helpers';
-import CartItem from '../CartItem';
-import Auth from '../../utils/auth';
-import './style.css';
+import React, { useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { useSelector, useDispatch } from "react-redux"; // replace with useSelector, useDispatch
+import {
+  toggleCart,
+  addMultipleToCart,
+  checkout,
+  redirectToCheckout,
+} from "../../store/eStoreSlice"; // replace with toggleCart, addMultipleToCart, checkout
+import { idbPromise } from "../../utils/helpers";
+import CartItem from "../CartItem";
+import Auth from "../../utils/auth";
+import "./style.css";
 
-const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
-
+const stripePromise = loadStripe("pk_test_TYooMQauvdEDq54NiTphI7jx");
 const Cart = () => {
   const state = useSelector((state) => state.eStore); // replace with useSelector
   const dispatch = useDispatch(); // replace with useDispatch
 
-  // no longer needed with redux
-  // useEffect(() => {
-  //   if (data) {
-  //     stripePromise.then((res) => {
-  //       res.redirectToCheckout({ sessionId: data.checkout.session });
-  //     });
-  //   }
-  // }, [data]);
+  useEffect(() => {
+    stripePromise.then((res) => {
+      dispatch(redirectToCheckout(state.products))
+    });
+    // eslint-disable-next-line
+  }, [stripePromise, dispatch, state.products]); //dependency array
 
   useEffect(() => {
     async function getCart() {
-      const cart = await idbPromise('cart', 'get');
-      dispatch( addMultipleToCart ([...cart] )); // addMultipleToCart from eStoreSlice
+      const cart = await idbPromise("cart", "get");
+      dispatch(addMultipleToCart([...cart])); // addMultipleToCart from eStoreSlice
     }
 
     if (!state.cart.length) {
@@ -97,7 +99,8 @@ const Cart = () => {
           </span>
           Nothing added to cart yet!
         </h3>
-        )};
+      )}
+      ;
     </div>
   );
 };

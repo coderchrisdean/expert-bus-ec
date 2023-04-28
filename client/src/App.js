@@ -14,10 +14,10 @@ import NoMatch from './pages/NoMatch';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Nav from './components/Nav';
-import { Provider } from './utils/GlobalState'; //replace StoreProvider with Provider
+import { Provider } from 'react-redux';
 import Success from './pages/Success';
 import OrderHistory from './pages/OrderHistory';
-import StoreProvider from './utils/GlobalState';
+import eStore from './store/eStoreSlice';
 
 const httpLink = createHttpLink({
   uri: '/graphql',
@@ -41,9 +41,10 @@ const client = new ApolloClient({
 function App() {
   return (
     <ApolloProvider client={client}>
-      <Router>
-        <div>
-          <Provider> {/* replace StoreProvider with Provider */}
+       
+      <Provider store={eStore}>{/* replace StoreProvider with Provider */}
+        <Router>
+          <>
             <Nav />
             <Routes>
               <Route 
@@ -75,10 +76,11 @@ function App() {
                 element={<NoMatch />} 
               />
             </Routes>
-          </Provider>{/* replace StoreProvider with Provider */}
-        </div>
+            </>
       </Router>
-    </ApolloProvider>
+    </Provider>
+      
+  </ApolloProvider>
   );
 }
 
